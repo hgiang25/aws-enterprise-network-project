@@ -115,10 +115,10 @@ module "transit_gateway" {
 module "main_tgw_routes" {
   source = "../../modules/vpc-tgw-routes"
 
-  route_table_ids        = module.main_vpc.private_route_table_ids
-  transit_gateway_id     = module.transit_gateway.transit_gateway_id
-  destination_cidrs      = [local.branch_vpc_cidr, local.shared_vpc_cidr]
-  excluded_route_tables  = ["guest-b"]
+  route_table_ids       = module.main_vpc.private_route_table_ids
+  transit_gateway_id    = module.transit_gateway.transit_gateway_id
+  destination_cidrs     = [local.branch_vpc_cidr, local.shared_vpc_cidr]
+  excluded_route_tables = ["guest-b"]
 
   depends_on = [module.transit_gateway]
 }
