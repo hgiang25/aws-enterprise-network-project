@@ -1,6 +1,9 @@
-# Keep backend disabled for local labs.
-# For production, enable S3 backend + DynamoDB lock table.
-#
-# terraform {
-#   backend "s3" {}
-# }
+terraform {
+  backend "s3" {
+    bucket         = "terraform-state-enterprise-network-248195880649"
+    key            = "prod/terraform.tfstate"
+    region         = "ap-southeast-1"
+    dynamodb_table = "terraform-lock-enterprise-network"
+    encrypt        = true
+  }
+}

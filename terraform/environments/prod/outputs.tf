@@ -1,17 +1,21 @@
 output "main_vpc_id" {
-  value = module.main_vpc.vpc_id
+  value       = module.main_vpc.vpc_id
+  description = "Main Office VPC ID."
 }
 
 output "branch_vpc_id" {
-  value = module.branch_vpc.vpc_id
+  value       = module.branch_vpc.vpc_id
+  description = "Branch Office VPC ID."
 }
 
 output "shared_services_vpc_id" {
-  value = module.shared_services_vpc.vpc_id
+  value       = module.shared_services_vpc.vpc_id
+  description = "Shared Services VPC ID."
 }
 
 output "transit_gateway_id" {
-  value = module.transit_gateway.transit_gateway_id
+  value       = module.transit_gateway.transit_gateway_id
+  description = "Transit Gateway ID."
 }
 
 output "shared_demo_instance_private_ip" {

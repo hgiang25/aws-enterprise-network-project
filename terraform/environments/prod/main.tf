@@ -8,9 +8,9 @@ locals {
     Owner       = "network-team"
   }
 
-  main_vpc_cidr   = "10.10.0.0/16"
-  branch_vpc_cidr = "10.20.0.0/16"
-  shared_vpc_cidr = "10.30.0.0/16"
+  main_vpc_cidr   = var.main_vpc_cidr
+  branch_vpc_cidr = var.branch_vpc_cidr
+  shared_vpc_cidr = var.shared_vpc_cidr
 }
 
 module "main_vpc" {
@@ -188,25 +188,28 @@ module "shared_vpc_endpoints" {
 module "main_flow_logs" {
   source = "../../modules/flow-logs"
 
-  name   = "${local.name_prefix}-main"
-  vpc_id = module.main_vpc.vpc_id
-  tags   = local.common_tags
+  name              = "${local.name_prefix}-main"
+  vpc_id            = module.main_vpc.vpc_id
+  retention_in_days = var.flow_log_retention_in_days
+  tags              = local.common_tags
 }
 
 module "branch_flow_logs" {
   source = "../../modules/flow-logs"
 
-  name   = "${local.name_prefix}-branch"
-  vpc_id = module.branch_vpc.vpc_id
-  tags   = local.common_tags
+  name              = "${local.name_prefix}-branch"
+  vpc_id            = module.branch_vpc.vpc_id
+  retention_in_days = var.flow_log_retention_in_days
+  tags              = local.common_tags
 }
 
 module "shared_flow_logs" {
   source = "../../modules/flow-logs"
 
-  name   = "${local.name_prefix}-shared"
-  vpc_id = module.shared_services_vpc.vpc_id
-  tags   = local.common_tags
+  name              = "${local.name_prefix}-shared"
+  vpc_id            = module.shared_services_vpc.vpc_id
+  retention_in_days = var.flow_log_retention_in_days
+  tags              = local.common_tags
 }
 
 module "shared_demo_service" {
@@ -216,6 +219,7 @@ module "shared_demo_service" {
   name               = "${local.name_prefix}-shared-demo"
   subnet_id          = module.shared_services_vpc.private_subnet_ids["services-a"]
   security_group_ids = [module.shared_security.internal_workload_sg_id]
+  instance_type      = var.demo_instance_type
   tags               = local.common_tags
 }
 
@@ -231,5 +235,6 @@ module "client_vpn" {
   security_group_ids         = [module.shared_security.client_vpn_sg_id]
   authorization_cidrs        = [local.main_vpc_cidr, local.branch_vpc_cidr, local.shared_vpc_cidr]
   dns_servers                = []
+  retention_in_days          = var.flow_log_retention_in_days
   tags                       = local.common_tags
 }
