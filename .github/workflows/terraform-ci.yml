@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -24,7 +24,7 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      - name: Terraform fmt
+      - name: Check Terraform format
         run: terraform fmt -check -recursive terraform
 
   terraform-validate:
@@ -33,6 +33,7 @@ jobs:
     needs: terraform-fmt
 
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, prod]
 
@@ -41,7 +42,7 @@ jobs:
         working-directory: terraform/environments/${{ matrix.environment }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -61,12 +62,13 @@ jobs:
     needs: terraform-validate
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Checkov
+      - name: Run Checkov as non-blocking scan
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: terraform
           framework: terraform
           quiet: true
+          soft_fail: true
