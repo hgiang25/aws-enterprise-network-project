@@ -1,0 +1,51 @@
+flowchart TB
+    Internet((Internet))
+    Remote[Remote VPN Users]
+
+    subgraph AWS[AWS Region]
+      TGW[Transit Gateway]
+
+      subgraph Main[Main Office VPC 10.10.0.0/16]
+        MainPublic[Public Subnets]
+        MainNat[NAT Gateway]
+        Staff[STAFF 10.10.10.0/24]
+        Dev[DEV 10.10.20.0/24]
+        Tester[TESTER 10.10.30.0/24]
+        HR[HR 10.10.40.0/24]
+        BA[BA 10.10.50.0/24]
+        PM[PM 10.10.60.0/24]
+        Tech[TECH 10.10.70.0/24]
+        Guest[GUEST 10.10.80.0/24]
+        CEO[CEO 10.10.90.0/24]
+      end
+
+      subgraph Branch[Branch Office VPC 10.20.0.0/16]
+        BrPublic[Public Subnets]
+        BrNat[NAT Gateway]
+        BrStaff[BR-STAFF 10.20.20.0/24]
+        BrIT[BR-IT 10.20.30.0/24]
+      end
+
+      subgraph Shared[Shared Services VPC 10.30.0.0/16]
+        Services[Internal Services 10.30.10.0/24]
+        Mgmt[Management 10.30.20.0/24]
+        Endpoints[VPC Endpoints]
+        ClientVPN[Client VPN]
+      end
+
+      FlowLogs[CloudWatch Log Groups]
+    end
+
+    Internet --> MainPublic --> MainNat
+    Internet --> BrPublic --> BrNat
+    Remote --> ClientVPN
+    ClientVPN --> Shared
+    Main --> TGW
+    Branch --> TGW
+    Shared --> TGW
+    TGW --> Main
+    TGW --> Branch
+    TGW --> Shared
+    Main --> FlowLogs
+    Branch --> FlowLogs
+    Shared --> FlowLogs

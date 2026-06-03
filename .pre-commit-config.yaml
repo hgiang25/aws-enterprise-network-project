@@ -1,0 +1,12 @@
+repos:
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.96.3
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tflint
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: 3.2.452
+    hooks:
+      - id: checkov
+        args: ["--quiet", "--framework", "terraform"]

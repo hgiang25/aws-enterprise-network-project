@@ -1,0 +1,17 @@
+project     = "aws-enterprise-network"
+environment = "dev"
+aws_region  = "ap-southeast-1"
+azs         = ["ap-southeast-1a", "ap-southeast-1b"]
+
+# Cost-saving default for labs. For production, use false.
+enable_nat_gateway = true
+single_nat_gateway = true
+
+# Demo EC2 service in private subnet, managed by SSM.
+enable_demo_service = true
+
+# Disabled by default because real ACM certificate ARNs are required.
+enable_client_vpn                  = false
+client_vpn_server_certificate_arn  = ""
+client_vpn_root_certificate_arn    = ""
+client_vpn_cidr                    = "10.250.0.0/22"
