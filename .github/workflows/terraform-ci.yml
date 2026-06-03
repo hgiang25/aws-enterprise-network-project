@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   terraform-fmt:
@@ -22,10 +21,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.8
+          terraform_version: 1.10.5
 
       - name: Check Terraform format
-        run: terraform fmt -check -recursive terraform
+        run: terraform fmt -check -recursive .
 
   terraform-validate:
     name: Terraform validate
@@ -48,7 +47,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.8
+          terraform_version: 1.10.5
 
       - name: Terraform init without backend
         run: terraform init -backend=false

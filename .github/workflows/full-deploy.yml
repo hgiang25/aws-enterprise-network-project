@@ -1,0 +1,96 @@
+name: Full Deploy Enterprise Network
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment to deploy"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  bootstrap:
+    name: Bootstrap Terraform Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+
+      - name: Terraform init bootstrap
+        run: terraform init
+        working-directory: bootstrap
+
+      - name: Import S3 state bucket if it already exists
+        run: terraform import aws_s3_bucket.tf_state terraform-state-enterprise-network-248195880649 || true
+        working-directory: bootstrap
+
+      - name: Import DynamoDB lock table if it already exists
+        run: terraform import aws_dynamodb_table.tf_lock terraform-lock-enterprise-network || true
+        working-directory: bootstrap
+
+      - name: Terraform apply bootstrap
+        run: terraform apply -auto-approve
+        working-directory: bootstrap
+
+  deploy:
+    name: Deploy network - ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: bootstrap
+
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve tfplan
