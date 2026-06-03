@@ -1,7 +1,9 @@
 output "transit_gateway_id" {
-  value = aws_ec2_transit_gateway.this.id
+  value       = aws_ec2_transit_gateway.this.id
+  description = "Transit Gateway ID."
 }
 
 output "attachment_ids" {
-  value = { for k, v in aws_ec2_transit_gateway_vpc_attachment.this : k => v.id }
+  value       = { for k, v in aws_ec2_transit_gateway_vpc_attachment.this : k => v.id }
+  description = "Transit Gateway VPC attachment IDs by name."
 }

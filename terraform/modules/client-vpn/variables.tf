@@ -45,6 +45,12 @@ variable "split_tunnel" {
   default     = true
 }
 
+variable "retention_in_days" {
+  type        = number
+  description = "Client VPN CloudWatch Log Group retention period in days."
+  default     = 365
+}
+
 variable "tags" {
   type        = map(string)
   description = "Common tags applied to Client VPN resources."

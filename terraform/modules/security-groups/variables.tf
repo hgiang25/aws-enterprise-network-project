@@ -20,6 +20,7 @@ variable "trusted_cidrs" {
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type        = map(string)
+  description = "Common tags."
+  default     = {}
 }

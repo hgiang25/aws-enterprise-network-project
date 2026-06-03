@@ -1,51 +1,49 @@
 variable "name" {
-  description = "Name prefix for the VPC."
   type        = string
+  description = "VPC name prefix."
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for the VPC."
   type        = string
+  description = "VPC CIDR block."
 }
 
 variable "azs" {
-  description = "Availability zones used by this VPC."
   type        = list(string)
+  description = "Availability zones used by the VPC."
+}
+
+variable "enable_nat_gateway" {
+  type        = bool
+  description = "Whether to create NAT Gateways."
+  default     = true
+}
+
+variable "single_nat_gateway" {
+  type        = bool
+  description = "Whether to create only one NAT Gateway for cost-saving labs."
+  default     = true
 }
 
 variable "public_subnets" {
-  description = "Public subnet definitions."
+  description = "Public subnets keyed by subnet name."
   type = map(object({
     cidr     = string
     az_index = number
   }))
-  default = {}
 }
 
 variable "private_subnets" {
-  description = "Private subnet definitions."
+  description = "Private subnets keyed by subnet name."
   type = map(object({
     cidr     = string
     az_index = number
     segment  = string
   }))
-  default = {}
-}
-
-variable "enable_nat_gateway" {
-  description = "Whether to create NAT Gateway for private subnet outbound Internet."
-  type        = bool
-  default     = true
-}
-
-variable "single_nat_gateway" {
-  description = "Use one NAT Gateway for all private subnets. For production, set false."
-  type        = bool
-  default     = true
 }
 
 variable "tags" {
-  description = "Common tags."
   type        = map(string)
+  description = "Common tags."
   default     = {}
 }

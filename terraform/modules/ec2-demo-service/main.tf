@@ -13,7 +13,7 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-data "aws_iam_policy_document" "assume_ec2" {
+data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
 
@@ -27,10 +27,9 @@ data "aws_iam_policy_document" "assume_ec2" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.name}-ssm-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_ec2.json
-
-  tags = var.tags
+  name               = "${var.name}-role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags               = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "ssm" {
@@ -39,7 +38,7 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 }
 
 resource "aws_iam_instance_profile" "this" {
-  name = "${var.name}-instance-profile"
+  name = "${var.name}-profile"
   role = aws_iam_role.this.name
 }
 
@@ -50,6 +49,8 @@ resource "aws_instance" "this" {
   vpc_security_group_ids      = var.security_group_ids
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.this.name
+  monitoring                  = true
+  ebs_optimized               = true
 
   user_data = <<-EOF
     #!/bin/bash

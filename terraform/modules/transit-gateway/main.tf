@@ -1,6 +1,6 @@
 resource "aws_ec2_transit_gateway" "this" {
   description                     = "Enterprise network hub"
-  amazon_side_asn                 = 64512
+  amazon_side_asn                 = var.amazon_side_asn
   default_route_table_association = "enable"
   default_route_table_propagation = "enable"
   dns_support                     = "enable"

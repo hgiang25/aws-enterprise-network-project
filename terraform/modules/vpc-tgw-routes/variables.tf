@@ -1,20 +1,20 @@
 variable "route_table_ids" {
-  description = "Route table IDs that need routes to Transit Gateway."
   type        = map(string)
+  description = "Route table IDs keyed by subnet name."
 }
 
 variable "transit_gateway_id" {
-  description = "Transit Gateway ID."
   type        = string
+  description = "Transit Gateway ID."
 }
 
 variable "destination_cidrs" {
-  description = "CIDR blocks routed through Transit Gateway."
   type        = list(string)
+  description = "CIDR blocks routed to Transit Gateway."
 }
 
 variable "excluded_route_tables" {
-  description = "Route table keys excluded from TGW routes, useful for guest internet-only subnet."
-  type        = set(string)
+  type        = list(string)
+  description = "Route table keys excluded from TGW routing, for example Guest."
   default     = []
 }
