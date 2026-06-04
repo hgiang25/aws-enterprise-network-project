@@ -9,6 +9,7 @@ permissions:
 env:
   AWS_REGION: ap-southeast-1
   TERRAFORM_VERSION: "1.10.5"
+  TF_STATE_BUCKET: terraform-state-enterprise-network-248195880649
 
 jobs:
   bootstrap:
@@ -34,12 +35,19 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
 
       - name: Terraform init
         run: terraform init
 
-      - name: Import S3 state bucket if it already exists
-        run: terraform import aws_s3_bucket.tf_state terraform-state-enterprise-network-248195880649 || true
+      - name: Import S3 state bucket only if it already exists
+        run: |
+          if aws s3api head-bucket --bucket "$TF_STATE_BUCKET" 2>/dev/null; then
+            echo "S3 bucket $TF_STATE_BUCKET already exists. Importing into Terraform state..."
+            terraform import aws_s3_bucket.tf_state "$TF_STATE_BUCKET" || true
+          else
+            echo "S3 bucket $TF_STATE_BUCKET does not exist yet. Terraform will create it."
+          fi
 
       - name: Terraform apply bootstrap
         run: terraform apply -auto-approve
