@@ -19,6 +19,10 @@ resource "aws_ec2_client_vpn_endpoint" "this" {
   split_tunnel           = var.split_tunnel
   security_group_ids     = var.security_group_ids
 
+  # dns_servers is an argument, not a nested block.
+  # Use null when the list is empty so Terraform omits it.
+  dns_servers = length(var.dns_servers) > 0 ? var.dns_servers : null
+
   authentication_options {
     type                       = "certificate-authentication"
     root_certificate_chain_arn = var.root_certificate_chain_arn
@@ -28,13 +32,6 @@ resource "aws_ec2_client_vpn_endpoint" "this" {
     enabled               = true
     cloudwatch_log_group  = aws_cloudwatch_log_group.client_vpn.name
     cloudwatch_log_stream = aws_cloudwatch_log_stream.client_vpn.name
-  }
-
-  dynamic "dns_servers" {
-    for_each = length(var.dns_servers) > 0 ? [1] : []
-    content {
-      dns_servers = var.dns_servers
-    }
   }
 
   tags = merge(var.tags, {
