@@ -33,6 +33,11 @@ variable "authorization_cidrs" {
   description = "CIDR ranges that VPN clients are authorized to access."
 }
 
+variable "route_cidrs" {
+  type        = list(string)
+  description = "CIDR ranges installed in the Client VPN route table. Usually the same as authorization_cidrs."
+}
+
 variable "dns_servers" {
   type        = list(string)
   description = "DNS servers pushed to VPN clients."

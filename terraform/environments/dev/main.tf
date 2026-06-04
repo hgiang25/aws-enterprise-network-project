@@ -86,6 +86,48 @@ module "shared_services_vpc" {
   tags = local.common_tags
 }
 
+module "main_network_acls" {
+  source = "../../modules/network-acls"
+
+  name                    = "${local.name_prefix}-main"
+  vpc_id                  = module.main_vpc.vpc_id
+  vpc_cidr                = module.main_vpc.vpc_cidr
+  public_subnet_ids       = module.main_vpc.public_subnet_ids
+  private_subnet_ids      = module.main_vpc.private_subnet_ids
+  isolate_private_subnets = true
+  guest_subnet_keys       = ["guest-b"]
+  guest_blocked_cidrs     = [local.main_vpc_cidr, local.branch_vpc_cidr, local.shared_vpc_cidr]
+  tags                    = local.common_tags
+}
+
+module "branch_network_acls" {
+  source = "../../modules/network-acls"
+
+  name                    = "${local.name_prefix}-branch"
+  vpc_id                  = module.branch_vpc.vpc_id
+  vpc_cidr                = module.branch_vpc.vpc_cidr
+  public_subnet_ids       = module.branch_vpc.public_subnet_ids
+  private_subnet_ids      = module.branch_vpc.private_subnet_ids
+  isolate_private_subnets = true
+  guest_subnet_keys       = []
+  guest_blocked_cidrs     = []
+  tags                    = local.common_tags
+}
+
+module "shared_network_acls" {
+  source = "../../modules/network-acls"
+
+  name                    = "${local.name_prefix}-shared"
+  vpc_id                  = module.shared_services_vpc.vpc_id
+  vpc_cidr                = module.shared_services_vpc.vpc_cidr
+  public_subnet_ids       = module.shared_services_vpc.public_subnet_ids
+  private_subnet_ids      = module.shared_services_vpc.private_subnet_ids
+  isolate_private_subnets = false
+  guest_subnet_keys       = []
+  guest_blocked_cidrs     = []
+  tags                    = local.common_tags
+}
+
 module "transit_gateway" {
   source = "../../modules/transit-gateway"
 
@@ -234,6 +276,7 @@ module "client_vpn" {
   target_subnet_ids          = values(module.shared_services_vpc.private_subnet_ids)
   security_group_ids         = [module.shared_security.client_vpn_sg_id]
   authorization_cidrs        = [local.main_vpc_cidr, local.branch_vpc_cidr, local.shared_vpc_cidr]
+  route_cidrs                = [local.main_vpc_cidr, local.branch_vpc_cidr, local.shared_vpc_cidr]
   dns_servers                = []
   retention_in_days          = var.flow_log_retention_in_days
   tags                       = local.common_tags

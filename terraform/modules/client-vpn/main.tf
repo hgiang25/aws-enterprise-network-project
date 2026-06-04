@@ -67,3 +67,25 @@ resource "aws_ec2_client_vpn_authorization_rule" "this" {
   authorize_all_groups   = true
   description            = "Allow VPN clients to access ${each.value}"
 }
+
+locals {
+  client_vpn_routes = merge([
+    for subnet_id in var.target_subnet_ids : {
+      for cidr in var.route_cidrs : "${subnet_id}-${cidr}" => {
+        subnet_id = subnet_id
+        cidr      = cidr
+      }
+    }
+  ]...)
+}
+
+resource "aws_ec2_client_vpn_route" "this" {
+  for_each = local.client_vpn_routes
+
+  client_vpn_endpoint_id = aws_ec2_client_vpn_endpoint.this.id
+  destination_cidr_block = each.value.cidr
+  target_vpc_subnet_id   = each.value.subnet_id
+  description            = "Route VPN clients to ${each.value.cidr}"
+
+  depends_on = [aws_ec2_client_vpn_network_association.this]
+}
