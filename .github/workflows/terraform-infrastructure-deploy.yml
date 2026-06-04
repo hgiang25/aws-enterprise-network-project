@@ -22,12 +22,8 @@ env:
 
 jobs:
   bootstrap:
-    name: Bootstrap Terraform Backend
+    name: Ensure Terraform Backend Exists
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: infrastructure/bootstrap
 
     steps:
       - name: Checkout repository
@@ -40,26 +36,69 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-          terraform_wrapper: false
-
-      - name: Terraform init bootstrap
-        run: terraform init
-
-      - name: Import S3 state bucket only if it already exists
+      - name: Check or create Terraform state bucket
         run: |
-          if aws s3api head-bucket --bucket "$TF_STATE_BUCKET" 2>/dev/null; then
-            echo "S3 bucket $TF_STATE_BUCKET already exists. Importing into Terraform state..."
-            terraform import aws_s3_bucket.tf_state "$TF_STATE_BUCKET" || true
+          set -euo pipefail
+
+          echo "Checking S3 bucket: ${TF_STATE_BUCKET}"
+
+          if aws s3api head-bucket --bucket "${TF_STATE_BUCKET}" 2>/dev/null; then
+            echo "Bucket already exists: ${TF_STATE_BUCKET}"
           else
-            echo "S3 bucket $TF_STATE_BUCKET does not exist yet. Terraform will create it."
+            echo "Bucket does not exist. Creating: ${TF_STATE_BUCKET}"
+
+            aws s3api create-bucket \
+              --bucket "${TF_STATE_BUCKET}" \
+              --region "${AWS_REGION}" \
+              --create-bucket-configuration LocationConstraint="${AWS_REGION}"
+
+            echo "Waiting until bucket exists..."
+            aws s3api wait bucket-exists --bucket "${TF_STATE_BUCKET}"
           fi
 
-      - name: Terraform apply bootstrap
-        run: terraform apply -auto-approve
+      - name: Configure Terraform state bucket
+        run: |
+          set -euo pipefail
+
+          echo "Enabling versioning..."
+          aws s3api put-bucket-versioning \
+            --bucket "${TF_STATE_BUCKET}" \
+            --versioning-configuration Status=Enabled
+
+          echo "Enabling server-side encryption..."
+          aws s3api put-bucket-encryption \
+            --bucket "${TF_STATE_BUCKET}" \
+            --server-side-encryption-configuration '{
+              "Rules": [
+                {
+                  "ApplyServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "AES256"
+                  },
+                  "BucketKeyEnabled": true
+                }
+              ]
+            }'
+
+          echo "Blocking public access..."
+          aws s3api put-public-access-block \
+            --bucket "${TF_STATE_BUCKET}" \
+            --public-access-block-configuration '{
+              "BlockPublicAcls": true,
+              "IgnorePublicAcls": true,
+              "BlockPublicPolicy": true,
+              "RestrictPublicBuckets": true
+            }'
+
+      - name: Verify Terraform state bucket
+        run: |
+          set -euo pipefail
+
+          aws s3api head-bucket --bucket "${TF_STATE_BUCKET}"
+          aws s3api get-bucket-versioning --bucket "${TF_STATE_BUCKET}"
+          aws s3api get-bucket-encryption --bucket "${TF_STATE_BUCKET}"
+          aws s3api get-public-access-block --bucket "${TF_STATE_BUCKET}"
+
+          echo "Terraform backend is ready."
 
   network:
     name: Terraform ${{ github.event.inputs.action }} enterprise network

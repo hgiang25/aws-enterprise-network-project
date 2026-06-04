@@ -47,28 +47,3 @@ resource "aws_s3_bucket_public_access_block" "tf_state" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
-resource "aws_s3_bucket_lifecycle_configuration" "tf_state" {
-  bucket = aws_s3_bucket.tf_state.id
-
-  rule {
-    id     = "expire-stale-terraform-lock-files"
-    status = "Enabled"
-
-    # Terraform S3 native lock file uses:
-    # <backend key>.tflock
-    # In this project, the backend key is:
-    # aws_network/terraform.tfstate
-    filter {
-      prefix = "aws_network/terraform.tfstate.tflock"
-    }
-
-    expiration {
-      days = 7
-    }
-  }
-
-  depends_on = [
-    aws_s3_bucket_versioning.tf_state
-  ]
-}
