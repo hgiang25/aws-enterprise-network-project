@@ -3,15 +3,17 @@ deployment = "aws"
 aws_region = "ap-southeast-1"
 azs        = ["ap-southeast-1a", "ap-southeast-1b"]
 
-enable_nat_gateway = true
-single_nat_gateway = true
+enable_main_nat_gateway   = true
+enable_branch_nat_gateway = true
+enable_shared_nat_gateway = false
+single_nat_gateway        = true
 
-enable_demo_service = true
+enable_demo_service = false
 demo_instance_type  = "t3.micro"
 
-# Set true to fully migrate the Cisco remote VPN function to AWS Client VPN.
-# If both certificate ARNs are empty, Terraform will generate lab certificates automatically.
-enable_client_vpn                 = true
+# Set true to enable AWS Client VPN.
+# If both certificate ARNs are empty, Terraform can generate lab certificates automatically.
+enable_client_vpn                 = false
 client_vpn_server_certificate_arn = ""
 client_vpn_root_certificate_arn   = ""
 client_vpn_cidr                   = "10.250.0.0/22"

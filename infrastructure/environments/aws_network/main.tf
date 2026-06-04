@@ -65,7 +65,7 @@ module "main_vpc" {
   name               = "${local.name_prefix}-main"
   vpc_cidr           = local.main_vpc_cidr
   azs                = var.azs
-  enable_nat_gateway = var.enable_nat_gateway
+  enable_nat_gateway = var.enable_main_nat_gateway
   single_nat_gateway = var.single_nat_gateway
   public_subnets     = local.main_public_subnets
   private_subnets    = local.main_private_subnets
@@ -78,7 +78,7 @@ module "branch_vpc" {
   name               = "${local.name_prefix}-branch"
   vpc_cidr           = local.branch_vpc_cidr
   azs                = var.azs
-  enable_nat_gateway = var.enable_nat_gateway
+  enable_nat_gateway = var.enable_branch_nat_gateway
   single_nat_gateway = var.single_nat_gateway
   public_subnets     = local.branch_public_subnets
   private_subnets    = local.branch_private_subnets
@@ -91,7 +91,7 @@ module "shared_services_vpc" {
   name               = "${local.name_prefix}-shared"
   vpc_cidr           = local.shared_vpc_cidr
   azs                = var.azs
-  enable_nat_gateway = var.enable_nat_gateway
+  enable_nat_gateway = var.enable_shared_nat_gateway
   single_nat_gateway = var.single_nat_gateway
   public_subnets     = local.shared_public_subnets
   private_subnets    = local.shared_private_subnets

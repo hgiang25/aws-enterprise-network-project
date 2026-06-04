@@ -40,22 +40,34 @@ variable "shared_vpc_cidr" {
   default     = "10.30.0.0/16"
 }
 
-variable "enable_nat_gateway" {
+variable "enable_main_nat_gateway" {
   type        = bool
-  description = "Whether to create NAT Gateways for private subnet internet egress."
+  description = "Create NAT Gateway for Main VPC private subnet internet egress."
   default     = true
+}
+
+variable "enable_branch_nat_gateway" {
+  type        = bool
+  description = "Create NAT Gateway for Branch VPC private subnet internet egress."
+  default     = true
+}
+
+variable "enable_shared_nat_gateway" {
+  type        = bool
+  description = "Create NAT Gateway for Shared Services VPC. Disabled by default to reduce Elastic IP usage."
+  default     = false
 }
 
 variable "single_nat_gateway" {
   type        = bool
-  description = "Use one NAT Gateway per VPC to reduce Elastic IP usage and cost. Set false for higher availability."
+  description = "Use one NAT Gateway per enabled VPC to reduce Elastic IP usage and cost. Set false for higher availability."
   default     = true
 }
 
 variable "enable_demo_service" {
   type        = bool
   description = "Create private EC2 demo service in Shared Services VPC."
-  default     = true
+  default     = false
 }
 
 variable "demo_instance_type" {
