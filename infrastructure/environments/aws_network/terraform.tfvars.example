@@ -4,7 +4,7 @@ aws_region = "ap-southeast-1"
 azs        = ["ap-southeast-1a", "ap-southeast-1b"]
 
 enable_nat_gateway = true
-single_nat_gateway = false
+single_nat_gateway = true
 
 enable_demo_service = true
 demo_instance_type  = "t3.micro"

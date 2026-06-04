@@ -48,8 +48,8 @@ variable "enable_nat_gateway" {
 
 variable "single_nat_gateway" {
   type        = bool
-  description = "Use one NAT Gateway for cost saving. Set false for Cisco-like HA."
-  default     = false
+  description = "Use one NAT Gateway per VPC to reduce Elastic IP usage and cost. Set false for higher availability."
+  default     = true
 }
 
 variable "enable_demo_service" {
