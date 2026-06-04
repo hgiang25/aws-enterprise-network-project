@@ -9,7 +9,9 @@ single_nat_gateway = false
 enable_demo_service = true
 demo_instance_type  = "t3.micro"
 
-enable_client_vpn                 = false
+# Set true to fully migrate the Cisco remote VPN function to AWS Client VPN.
+# If both certificate ARNs are empty, Terraform will generate lab certificates automatically.
+enable_client_vpn                 = true
 client_vpn_server_certificate_arn = ""
 client_vpn_root_certificate_arn   = ""
 client_vpn_cidr                   = "10.250.0.0/22"

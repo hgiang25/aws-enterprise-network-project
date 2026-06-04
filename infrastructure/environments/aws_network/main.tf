@@ -129,7 +129,7 @@ module "main_tgw_routes" {
 
   route_table_ids       = module.main_vpc.private_route_table_ids
   transit_gateway_id    = module.transit_gateway.transit_gateway_id
-  destination_cidrs     = [local.shared_vpc_cidr]
+  destination_cidrs     = [local.branch_vpc_cidr, local.shared_vpc_cidr]
   excluded_route_tables = ["guest-b"]
 
   depends_on = [module.transit_gateway]
@@ -140,7 +140,7 @@ module "branch_tgw_routes" {
 
   route_table_ids    = module.branch_vpc.private_route_table_ids
   transit_gateway_id = module.transit_gateway.transit_gateway_id
-  destination_cidrs  = [local.shared_vpc_cidr]
+  destination_cidrs  = [local.main_vpc_cidr, local.shared_vpc_cidr]
 
   depends_on = [module.transit_gateway]
 }
@@ -161,7 +161,7 @@ module "main_security" {
   name          = "${local.name_prefix}-main"
   vpc_id        = module.main_vpc.vpc_id
   vpc_cidr      = module.main_vpc.vpc_cidr
-  trusted_cidrs = [local.shared_vpc_cidr, var.client_vpn_cidr]
+  trusted_cidrs = [local.branch_vpc_cidr, local.shared_vpc_cidr, var.client_vpn_cidr]
   tags          = local.common_tags
 }
 
@@ -171,7 +171,7 @@ module "branch_security" {
   name          = "${local.name_prefix}-branch"
   vpc_id        = module.branch_vpc.vpc_id
   vpc_cidr      = module.branch_vpc.vpc_cidr
-  trusted_cidrs = [local.shared_vpc_cidr, var.client_vpn_cidr]
+  trusted_cidrs = [local.main_vpc_cidr, local.shared_vpc_cidr, var.client_vpn_cidr]
   tags          = local.common_tags
 }
 
